@@ -1,4 +1,4 @@
-import pandas as pd
+#import pandas as pd
 import io
 import os
 import sys
@@ -199,7 +199,7 @@ def extract_dividend_data(file_content: str) -> str:
     for line in dividends_lines:
         transaction = convert_dividend_line_to_transaction(line)
         dividend_transactions.append(transaction)
-    print(dividend_transactions)
+    return dividend_transactions
 
 def extract_buy_data(file_content: str) -> list:
     """
@@ -216,7 +216,7 @@ def extract_buy_data(file_content: str) -> list:
             continue
         # Quantity: positive for buy, negative for sell
         try:
-            quantity = float(fields[7])
+            quantity = float(fields[8])
         except ValueError:
             continue
         if quantity > 0:
@@ -224,11 +224,7 @@ def extract_buy_data(file_content: str) -> list:
             date = fields[6].strip('"')
             symbol = fields[5]
             try:
-                price = float(fields[8])
-            except ValueError:
-                price = None
-            try:
-                amount = float(fields[10])
+                amount = float(fields[9]) # For buy transactions, amount is the trading price
             except ValueError:
                 amount = None
             transaction = Transaction(
@@ -236,7 +232,6 @@ def extract_buy_data(file_content: str) -> list:
                 transaction_type='Buy',
                 symbol=symbol,
                 quantity=quantity,
-                price=price,
                 amount=amount,
                 Broker='Interactive Brokers'
             )
@@ -261,8 +256,12 @@ if __name__ == '__main__':
         with open(file_path, 'r', encoding='utf-8') as f:
             file_content = f.read()
             
-        result = extract_dividend_data(file_content)
-        #print(result)
+        transactions = extract_dividend_data(file_content)
+        print(transactions)
+        print("\n---\n")
+
+        transactions = extract_buy_data(file_content)
+        print(transactions)
 
     except Exception as e:
         print(f"A critical error occurred while reading or processing the file: {e}")
