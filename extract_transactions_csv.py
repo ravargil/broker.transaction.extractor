@@ -2,6 +2,7 @@
 import io
 import os
 import sys
+import re
 from src.transactions_extractor import Transaction
 
 # IMPORTANT: This script is now designed to run from the command line.
@@ -149,11 +150,6 @@ def extract_financial_data(file_content: str) -> str:
     except Exception as e:
         return f"An unexpected error occurred during processing the CSV data. Please check the file format. Error: {e}"
 
-def convert_dividend_line_to_transaction(line: str):
-    raise NotImplementedError
-
-import re
-
 def extract_symbol_and_dividend_per_share(description: str):
     """
     Extracts the symbol (all letters until '(') and dividend per share (float) from the description field.
@@ -238,6 +234,40 @@ def extract_buy_data(file_content: str) -> list:
             buy_transactions.append(transaction)
     return buy_transactions
 
+def extract_deposit_data(file_content: str) -> list:
+    """
+    Extracts all deposit transactions from the IBKR CSV file content.
+    Returns a list of Transaction objects for each deposit.
+    """
+    deposit_transactions = []
+    # Find all lines that represent deposits
+    deposit_lines = [line for line in file_content.splitlines() if line.startswith("Deposits & Withdrawals,Data,")]
+    for line in deposit_lines:
+        fields = line.split(',')
+        # Defensive: Ensure enough fields
+        if len(fields) < 5:
+            raise ValueError("Insufficient fields in deposit transaction line.")
+        if fields[2].startswith("Total"):
+            continue  # Skip summary lines
+        if fields[2] != "ILS":
+            raise ValueError("Unsupported currency for deposit transaction. Only ILS is supported.")
+        if fields[4] != "Electronic Fund Transfer":
+            raise ValueError("Unsupported deposit type. Only 'Electronic Fund Transfer' is supported.")
+        # Extract relevant fields
+        date = fields[3].strip('"')
+        try:
+            amount = float(fields[5])
+        except ValueError:
+            amount = None
+        transaction = Transaction(
+            date=date,
+            transaction_type='Cash Transfer',
+            symbol='',
+            amount=amount,
+            Broker='Interactive Brokers'
+        )
+        deposit_transactions.append(transaction)
+    return deposit_transactions
 # --- Command Line Execution Block ---
 # This block runs the script when executed directly from the command line.
 if __name__ == '__main__':
@@ -262,6 +292,11 @@ if __name__ == '__main__':
 
         transactions = extract_buy_data(file_content)
         print(transactions)
+        print("\n---\n")
+
+        transactions = extract_deposit_data(file_content)
+        print(transactions)
+        print("\n---\n")
 
     except Exception as e:
         print(f"A critical error occurred while reading or processing the file: {e}")
