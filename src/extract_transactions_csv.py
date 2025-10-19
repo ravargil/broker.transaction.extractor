@@ -1,9 +1,16 @@
 import os
 import re
 from typing import List
-from src.transactions_extractor import Transaction, TransactionsExtractor
+from transactions_extractor import Transaction, TransactionsExtractor
 
 class CSVTransactionsExtractor(TransactionsExtractor):
+    def __init__(self):
+        """
+        Initialize CSVTransactionsExtractor.
+        You can add configuration or logger here if needed in the future.
+        """
+        pass
+
     def extract_symbol_and_dividend_per_share(self, description: str):
         """
         Extracts the symbol (all letters until '(') and dividend per share (float) from the description field.
