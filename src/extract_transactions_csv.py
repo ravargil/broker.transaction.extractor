@@ -1,7 +1,7 @@
 import os
 import re
 from typing import List
-from transactions_extractor import Transaction, TransactionsExtractor
+from src.transactions_extractor import Transaction, TransactionsExtractor
 
 class CSVTransactionsExtractor(TransactionsExtractor):
     def __init__(self):
@@ -48,10 +48,8 @@ class CSVTransactionsExtractor(TransactionsExtractor):
         dividends_header_lines = [line for line in file_content.splitlines() if line.startswith("Dividends,Header,")]
         if len(dividends_header_lines) > 1:
             raise Exception("Multiple 'Dividends,Header,' lines found in the file.")
-        print(dividends_header_lines)
 
         dividends_lines = [line for line in file_content.splitlines() if line.startswith("Dividends,Data,")]
-        print(dividends_lines)
         dividend_transactions = []
         for line in dividends_lines:
             transaction = self._convert_dividend_line_to_transaction(line)
