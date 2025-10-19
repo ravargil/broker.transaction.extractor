@@ -27,7 +27,7 @@ class CSVTransactionsExtractor(TransactionsExtractor):
 
         return symbol, dividend_per_share
 
-    def convert_dividend_line_to_transaction(self, line: str) -> Transaction:
+    def _convert_dividend_line_to_transaction(self, line: str) -> Transaction:
         # Assuming the line is a CSV string, we split it and extract relevant fields
         fields = line.split(',')
         date = fields[3]  # Example index for date
@@ -43,7 +43,7 @@ class CSVTransactionsExtractor(TransactionsExtractor):
             DividendPerShare=dividend_per_share,
         )
 
-    def extract_dividend_data(self, file_content: str) -> List[Transaction]:
+    def _extract_dividend_data(self, file_content: str) -> List[Transaction]:
         # Iterate over lines in file_content and extract those starting with "Dividends,Header,"
         dividends_header_lines = [line for line in file_content.splitlines() if line.startswith("Dividends,Header,")]
         if len(dividends_header_lines) > 1:
@@ -54,11 +54,11 @@ class CSVTransactionsExtractor(TransactionsExtractor):
         print(dividends_lines)
         dividend_transactions = []
         for line in dividends_lines:
-            transaction = self.convert_dividend_line_to_transaction(line)
+            transaction = self._convert_dividend_line_to_transaction(line)
             dividend_transactions.append(transaction)
         return dividend_transactions
 
-    def extract_buy_data(self, file_content: str) -> List[Transaction]:
+    def _extract_buy_data(self, file_content: str) -> List[Transaction]:
         buy_transactions = []
         # Find all lines that represent a trade order in stocks (buys and sells)
         trade_lines = [line for line in file_content.splitlines() if line.startswith("Trades,Data,Order,Stocks,")]
@@ -91,7 +91,7 @@ class CSVTransactionsExtractor(TransactionsExtractor):
                 buy_transactions.append(transaction)
         return buy_transactions
 
-    def extract_deposit_data(self, file_content: str) -> List[Transaction]:
+    def _extract_deposit_data(self, file_content: str) -> List[Transaction]:
         deposit_transactions = []
         # Find all lines that represent deposits
         deposit_lines = [line for line in file_content.splitlines() if line.startswith("Deposits & Withdrawals,Data,")]
@@ -128,9 +128,9 @@ class CSVTransactionsExtractor(TransactionsExtractor):
         with open(file_path, 'r', encoding='utf-8') as f:
             file_content = f.read()
         transactions = []
-        transactions.extend(self.extract_dividend_data(file_content))
-        transactions.extend(self.extract_buy_data(file_content))
-        transactions.extend(self.extract_deposit_data(file_content))
+        transactions.extend(self._extract_dividend_data(file_content))
+        transactions.extend(self._extract_buy_data(file_content))
+        transactions.extend(self._extract_deposit_data(file_content))
         return transactions
 
 # Example usage:
