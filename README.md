@@ -18,9 +18,11 @@ The Broker Transaction Extractor is a Python application designed to parse broke
    ```
 
 ## Usage
+Before running, set the PYTHONPATH variable in your shell or terminal session to include src folder.
 To run the application, execute the following command:
 ```
-python main.py
+
+python update_transactions.py
 ```
 This will start the application and display a greeting message.
 
